@@ -9,6 +9,11 @@
       <p>comparing wasm and js performance</p>
       <hr class="m-600">
       <div class="tests"></div>
+      <footer>
+        <div>Christopher Borum</div>
+        <div>Kristoffer Noga</div>
+        <div>Kristian Nielsen</div>
+      </footer>
     </div>
     <script src="input-generators.js"></script>
     <script src="functions.js"></script>
@@ -55,42 +60,9 @@
         // modes
         await init();
 
-        // greet('Bois');
-
-        const $ = query => document.querySelector(query);
-        const $$ = query => document.querySelectorAll(query);
-
-        const tests = $$('[data-test]');
-
-        window.wasmFns = wasmFns
-
-
-
-        // Array.from(tests).forEach(testContainer => {
-        //   const testName = testContainer.getAttribute('data-test');
-        //   const jsBtn = testContainer.querySelector('button.js');
-        //   const jsResultElement = testContainer.querySelector('.results .value.js');
-
-        //   jsBtn.addEventListener('click', () => {
-        //     const testFn = window[`${testName}_js`];
-        //     const {elapsed, value} = timed(() => testFn(40));
-        //     jsResultElement.innerText = `${value} (in ${elapsed} ms)`
-        //   })
-
-        //   const wasmBtn = testContainer.querySelector('button.wasm');
-        //   const wasmResultElement = testContainer.querySelector('.results .value.wasm');
-
-        //   wasmBtn.addEventListener('click', () => {
-        //     const testFn = wasmFns[testName];
-        //     console.log('testFn:', testFn.name)
-        //     const {elapsed, value} = timed(() => testFn(40));
-        //     wasmResultElement.innerText = `${value} (in ${elapsed} ms)`
-        //   })
-        // })
-
         initRunService(
           document.querySelector('.tests'),
-          ['fib'],
+          [ 'fib', 'is_prime' ],
           wasmFns,
           jsFns
         )

@@ -38,17 +38,17 @@ will be implemented in both js and wasm, and timed in the browser.
 ---
 ### 2.2 adding functions
 
-#### js 
+#### 2.2.1 js 
 
 add the function to ````node-app/public/functions.js```` and make sure it is referenced in the ````jsFns```` object (in the same file)
 
-#### rust
+#### 2.2.2 rust
 
 add the function to ````rust-lib/src/lib.rs```` and make sure it is annotated with ````#[wasm_bindgen]````
 
 make sure you recompile the rust package after adding a new function (see section 1.2)
 
-#### index.html: 
+#### 2.2.3 index.html: 
 navigate to ````node-app/public/index.html```` and find the following line:
 ````
 initRunService(
@@ -59,3 +59,7 @@ initRunService(
 )
 ````
 make sure you add the name of your test function (should be the same in rust and js) to the string array (2nd argument to the ````initRunService```` function)
+
+#### 2.2.4 input-generators
+
+navigate to ````node-app/public/input-generators.js````. As the name suggests, this file generates input values for the tested functions. Add a property to the ````inputGenerators```` object, where the key matches  the name of the test function, and the value is a function that returns a value, that the function can be tested with

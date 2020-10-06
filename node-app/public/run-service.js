@@ -68,7 +68,7 @@ const renderTest = (name, wasmFns, jsFns) => r('div', {
     },
     children: container => [
         r('h3', {
-            innerText: name
+            innerText: `${name} (${inputGenerators[name]()})`
         }),
         r('div', {
             className: 'm-500 test-buttons',

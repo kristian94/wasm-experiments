@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 body {
-    background: rgba(0,0,0,0.03)
+    background: rgba(240,240,240)
 }
 
 * {
@@ -103,4 +103,18 @@ div.tests .test {
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 24px 48px;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    gap: 48px;
+    color: rgb(150, 150, 150);
+    grid-template-columns: 1fr 1fr 1fr;
+    width: 100%;
+    text-align: center;
+    padding: 24px 0;
+    background: linear-gradient(to top, rgba(240,240,240), rgba(0,0,0,0))
 }
