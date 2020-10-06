@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+body {
+    background: rgba(0,0,0,0.03)
+}
+
+* {
+    font-family: 'Courier Prime';
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+h1 {
+    font-size: 46px;
+    line-height: 72px;
+}
+
+h2 {
+    font-size: 35px;
+    line-height: 48px;
+}
+
+h3 {
+    font-size: 27px;
+    line-height: 48px;
+}
+
+h4 {
+    font-size: 21px;
+    line-height: 24px;
+}
+
+h5 {
+    font-size: 16px;
+    line-height: 24px;
+}
+
+
+h1:not(:last-child), 
+h2:not(:last-child), 
+h3:not(:last-child), 
+h4:not(:last-child), 
+h5:not(:last-child),
+p:not(:last-child),
+button:not(:last-child),
+hr:not(:last-child),
+.m-500:not(:last-child) {
+    margin-bottom: 24px;
+}
+
+.m-600:not(:last-child){
+    margin-bottom: 48px;
+}
+
+button {
+    line-height: 24px;
+    padding: 12px;
+    min-width: 200px;
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    background: linear-gradient(to right, rgba(53, 189, 148, 0.125),  rgba(53, 179, 168, 0.125))
+}
+
+p {
+    font-size: 16px;
+    line-height: 24px;
+}
+
+.main {
+    display: block;
+    margin: 0 auto;
+    max-width: 1200px;
+    padding: 96px 0;
+}
+
+div.tests {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+div.tests .test {
+    padding: 24px;
+    background: white;
+}
+
+.test .test-buttons {
+    display: grid;
+    gap: 0 24px;
+}
+
+.test .name {
+    background: linear-gradient(to right, rgba(53, 189, 148, 0.5), rgba(53, 179, 168, 0.5));
+    color: white;
+    margin: -24px -24px 24px -24px;
+    padding: 0 24px;
+}
+
+.results {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 24px 48px;
+}

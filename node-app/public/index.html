@@ -1,8 +1,19 @@
 <html>
   <head>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+    <link rel="stylesheet" href="index.css">
   </head>
   <body>
+    <div class="main">
+      <h1>wasm experiments</h4>
+      <p>comparing wasm and js performance</p>
+      <hr class="m-600">
+      <div class="tests"></div>
+    </div>
+    <script src="input-generators.js"></script>
+    <script src="functions.js"></script>
+    <script src="run-service.js"></script>
+
     <!-- Note the usage of `type=module` here as this is an ES6 module -->
     <script type="module">
       // Use ES module import syntax to import functionality from the module
@@ -12,7 +23,8 @@
       // will "boot" the module and make it ready to use. Currently browsers
       // don't support natively imported WebAssembly as an ES module, but
       // eventually the manual initialization won't be required!
-      import init, { greet } from './pkg/rust_02.js';
+      import init, * as wasmFns from './pkg/rust_02.js';
+      
 
       async function run() {
         // First up we need to actually load the wasm file, so we use the
@@ -43,16 +55,50 @@
         // modes
         await init();
 
-        greet('Bois');
+        // greet('Bois');
 
-        // And afterwards we can use all the functionality defined in wasm.
-        // const result = add(1, 2);
-        // console.log(`1 + 2 = ${result}`);
-        // if (result !== 3)
-        //   throw new Error("wasm addition doesn't work!");
+        const $ = query => document.querySelector(query);
+        const $$ = query => document.querySelectorAll(query);
+
+        const tests = $$('[data-test]');
+
+        window.wasmFns = wasmFns
+
+
+
+        // Array.from(tests).forEach(testContainer => {
+        //   const testName = testContainer.getAttribute('data-test');
+        //   const jsBtn = testContainer.querySelector('button.js');
+        //   const jsResultElement = testContainer.querySelector('.results .value.js');
+
+        //   jsBtn.addEventListener('click', () => {
+        //     const testFn = window[`${testName}_js`];
+        //     const {elapsed, value} = timed(() => testFn(40));
+        //     jsResultElement.innerText = `${value} (in ${elapsed} ms)`
+        //   })
+
+        //   const wasmBtn = testContainer.querySelector('button.wasm');
+        //   const wasmResultElement = testContainer.querySelector('.results .value.wasm');
+
+        //   wasmBtn.addEventListener('click', () => {
+        //     const testFn = wasmFns[testName];
+        //     console.log('testFn:', testFn.name)
+        //     const {elapsed, value} = timed(() => testFn(40));
+        //     wasmResultElement.innerText = `${value} (in ${elapsed} ms)`
+        //   })
+        // })
+
+        initRunService(
+          document.querySelector('.tests'),
+          ['fib'],
+          wasmFns,
+          jsFns
+        )
       }
 
       run();
     </script>
+
+    
   </body>
 </html>
