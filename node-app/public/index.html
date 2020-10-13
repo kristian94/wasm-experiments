@@ -62,7 +62,7 @@
 
         initRunService(
           document.querySelector('.tests'),
-          [ 'fib', 'is_prime' ],
+          Object.keys(jsFns),
           wasmFns,
           jsFns
         )

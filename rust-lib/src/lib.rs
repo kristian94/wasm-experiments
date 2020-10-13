@@ -1,4 +1,5 @@
 use wasm_bindgen::prelude::*;
+use std::num;
 
 #[wasm_bindgen]
 extern {
@@ -30,4 +31,29 @@ pub fn is_prime(n: u32) -> bool {
         }
     }
     true // last value to return
+}
+
+#[wasm_bindgen]
+pub fn eratosthenes(n: usize) -> Vec<i32> {    
+    let upper_limit = (n as f64).sqrt();
+    let mut marks: Vec<bool> = vec![true; n]; 
+    let mut out: Vec<i32> = Vec::with_capacity(n);
+
+    for i in 2 .. upper_limit as usize {
+        if marks[i] == true {
+            let mut j = i * i;
+            while j < n {
+                marks[j] = false;
+                j += i;
+            }
+        }
+    }
+
+    for i in 2 .. n as usize {
+        if marks[i] == true {
+            out.push(i as i32);
+        }
+    }
+
+    return out;
 }

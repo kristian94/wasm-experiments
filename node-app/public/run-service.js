@@ -11,6 +11,8 @@
  *  }
  */
 
+const isTypedIntArray = x => !!x && x.constructor && /Int\d+Array/.test(x.constructor.name)
+
 // currentMs :: () -> Integer
 const currentMs = () => new Date().getTime();
 
@@ -42,21 +44,54 @@ const r = (tag, opts = {}) => {
     return el;
 }
 
+// formatResult :: Any -> String
+const formatResult = (res) => {
+    
+    if(Array.isArray(res) && res.length > 4){
+        return `[${res[0]}, ${res[1]}, ..., ${res[res.length - 2]}, ${res[res.length - 1]}]`
+    }
+
+    if(isTypedIntArray(res)){
+        if(res.length > 4){
+            const headIter = res.filter((value, index) => index <= 1 );
+            const tailIter = res.filter((value, index) => index >= res.length - 2 );
+
+            return `[${headIter.join(', ')}, ..., ${tailIter.join(', ')}]`
+        }else{
+            return `[${res.join(', ')}]`
+        }
+    }
+
+    return res;
+}
+
 // getTestEventListener :: (HTMLElement, Object, String, String) -> Event -> ()
 const getTestEventListener = (container, fns, name, type) => e => {
     const _innterText = e.target.innerText;
-    console.log(e.target)
     e.target.innerText = 'running...';
+
+    const finalize = () => {
+        e.target.innerText = _innterText;
+
+    }
 
     setTimeout(() => {
         const valueEl = container.querySelector(`.results .value.${type}`);
         const input = inputGenerators[name]();
-    
+
         const testFn = fns[name];
+        if(!testFn){
+            const errorMessage = `no test named "${name}" found in object: ${fns}`
+            errorHandler(new Error(errorMessage))
+            console.error(errorMessage)
+            finalize();
+            return;
+        }
     
         const {elapsed, value} = timed(() => testFn(input));
-        valueEl.innerText = `${value} (in ${elapsed} ms)`;
-        e.target.innerText = _innterText;
+        console.log(`${name} finished with value<${typeof value}>:`, value)
+        valueEl.innerText = `${formatResult(value)} (in ${elapsed} ms)`;
+        finalize();
     }, 10)
 }
 
@@ -111,5 +146,10 @@ const initRunService = (container, names, wasmFns, jsFns) => {
         container.appendChild(renderTest(name, wasmFns, jsFns));
     })
 
+    return {
+        runAll: () => {
+            
+        }
+    }
 }   
 

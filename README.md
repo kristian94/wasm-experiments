@@ -21,7 +21,7 @@ run all command from ````./rust-lib````
 
 1. modify files in src as wanted
 2. run ````wasm-pack build --target web````
-3. if you created new files, make sure these are imported in ````node-app/ public/index.html````
+3. if you created new files, make sure these are imported in ````node-app/public/index.html````
 
 
 ## 2. experiments
@@ -48,18 +48,6 @@ add the function to ````rust-lib/src/lib.rs```` and make sure it is annotated wi
 
 make sure you recompile the rust package after adding a new function (see section 1.2)
 
-#### 2.2.3 index.html: 
-navigate to ````node-app/public/index.html```` and find the following line:
-````
-initRunService(
-   document.querySelector('.tests'),
-   ['fib'],
-   wasmFns,
-   jsFns
-)
-````
-make sure you add the name of your test function (should be the same in rust and js) to the string array (2nd argument to the ````initRunService```` function)
-
-#### 2.2.4 input-generators
+#### 2.2.3 input-generators
 
 navigate to ````node-app/public/input-generators.js````. As the name suggests, this file generates input values for the tested functions. Add a property to the ````inputGenerators```` object, where the key matches  the name of the test function, and the value is a function that returns a value, that the function can be tested with
