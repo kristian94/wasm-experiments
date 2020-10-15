@@ -41,8 +41,47 @@ const eratosthenes = function(n) {
     return output;
 };
 
+const merge = (a, b) => {
+    let i = 0;
+    let j = 0;
+
+    const out = [];
+
+    while(i < a.length || j < b.length){
+        if(i >= a.length){
+            out.push(b[j]);
+            j++;
+            continue;
+        }
+
+        if(j >= b.length){
+            out.push(a[i]);
+            i++;
+            continue;
+        }
+
+        if(a[i] < b[j]){
+            out.push(a[i]);
+            i++;
+        }else{
+            out.push(b[j]);
+            j++;
+        }
+    }
+
+    return out;
+}
+
+// merge_sort :: [int] -> [int]
+const merge_sort = array => {
+    if(array.length === 1) return array;
+    const i = Math.floor(array.length / 2)
+    return merge(merge_sort(array.slice(0, i)), merge_sort(array.slice(i)))
+}
+
 const jsFns = {
     fib,
-    is_prime,
-    eratosthenes
+    // is_prime,
+    eratosthenes,
+    merge_sort
 }

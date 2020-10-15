@@ -8,6 +8,9 @@
       <h1>wasm experiments</h4>
       <p>comparing wasm and js performance</p>
       <hr class="m-600">
+      <div class="suite-menu m-600">
+        <button id="run-all-btn">Run suite (will take a few minutes)</button>
+      </div>
       <div class="tests"></div>
       <footer>
         <div>Christopher Borum</div>
@@ -59,6 +62,8 @@
         // exports which is the same as importing the `*_bg` module in other
         // modes
         await init();
+
+        window.wasmFns = wasmFns;
 
         initRunService(
           document.querySelector('.tests'),

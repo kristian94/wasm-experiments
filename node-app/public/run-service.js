@@ -44,6 +44,11 @@ const r = (tag, opts = {}) => {
     return el;
 }
 
+const formatInputLabel = val => {
+    if(Array.isArray(val)) return  `${typeof(val[0])}[${val.length}]`;
+    return val;
+}
+
 // formatResult :: Any -> String
 const formatResult = (res) => {
     
@@ -65,14 +70,81 @@ const formatResult = (res) => {
     return res;
 }
 
-// getTestEventListener :: (HTMLElement, Object, String, String) -> Event -> ()
-const getTestEventListener = (container, fns, name, type) => e => {
-    const _innterText = e.target.innerText;
-    e.target.innerText = 'running...';
+const getNameFromContainer = container => container.getAttribute('data-test')
+
+const getTargetFromContainer = (container, type) => container.querySelector(`.run-btn.run-10.${type}`)
+
+// runSuite :: ([HTMLElement], Object, Object) -> Promise [Any] Error
+const runSuite = (containers, jsFns, wasmFns) => {
+    const types = ['js', 'wasm'];
+
+    fns = {
+        js: jsFns,
+        wasm: wasmFns
+    }
+
+    containers.reduce((prom, container) => prom.then(_ => types.reduce((_prom, type) => _prom.then(__ => {
+        const target = getTargetFromContainer(container, type);
+        return runTestN(container, fns[type], getNameFromContainer(container), type, target, 10);
+    }), Promise.resolve())), Promise.resolve())
+
+    // return Promise.all(containers.map(container => Promise.all(types.map(type => {
+    //     const target = getTargetFromContainer(container, type)
+    //     return runTestN(container, fns[type], getNameFromContainer(container), type, target, 10);
+    // }))))
+}
+
+const runTestN = (container, fns, name, type, target, n) => new Promise((resolve, reject) => {
+    {
+        if(n < 1) return;
+        const _innterText = target.innerText;
+        const valueEl = container.querySelector(`.results .value.${type}`);
+        const input = inputGenerators[name]();
+    
+        const results = [];
+
+        const testFn = fns[name];
+        if(!testFn){
+            const errorMessage = `no test named "${name}" found in object: ${fns}`
+            errorHandler(new Error(errorMessage))
+            console.error(errorMessage)
+            reject()
+            return;
+        }
+    
+        const finalize = () => {
+            target.innerText = _innterText;
+            const avgElapsed = results.reduce((sum, cur) => sum + cur.elapsed, 0) / n;
+            const value = results[0].value;
+    
+            console.log(`${name} finished with value<${typeof value}>:`, value)
+            valueEl.innerHTML = `${formatResult(value)}<br>${avgElapsed} ms (average over ${n} runs)`;
+            resolve();
+        }
+    
+        const _go = (rem) => {
+            target.innerText = `running... (${n - rem + 1}/${n})`;
+            setTimeout(() => {
+                if(rem > 0){
+                    const {elapsed, value} = timed(() => testFn(input));
+                    results.push({elapsed, value});
+                    _go(rem - 1);
+                }else{
+                    finalize()
+                }
+            }, 10)
+        }
+    
+        _go(n);
+    }
+})
+
+const runTest = (container, fns, name, type, target) => {
+    const _innterText = target.innerText;
+    target.innerText = 'running...';
 
     const finalize = () => {
-        e.target.innerText = _innterText;
-
+        target.innerText = _innterText;
     }
 
     setTimeout(() => {
@@ -90,10 +162,16 @@ const getTestEventListener = (container, fns, name, type) => e => {
     
         const {elapsed, value} = timed(() => testFn(input));
         console.log(`${name} finished with value<${typeof value}>:`, value)
-        valueEl.innerText = `${formatResult(value)} (in ${elapsed} ms)`;
+        valueEl.innerHTML = `${formatResult(value)}<br>${elapsed} ms`;
         finalize();
     }, 10)
 }
+
+// getTestEventListener :: (HTMLElement, Object, String, String) -> Event -> ()
+const getTestEventListener = (container, fns, name, type) => e => runTest(container, fns, name, type, e.target)
+
+// getTestEventListener :: (HTMLElement, Object, String, String) -> Event -> ()
+const get10TestEventListener = (container, fns, name, type) => e => runTestN(container, fns, name, type, e.target, 10)
 
 // renderTest :: (String, Object, Object) -> HTMLElement
 const renderTest = (name, wasmFns, jsFns) => r('div', {
@@ -103,7 +181,7 @@ const renderTest = (name, wasmFns, jsFns) => r('div', {
     },
     children: container => [
         r('h3', {
-            innerText: `${name} (${inputGenerators[name]()})`
+            innerText: `${name} (${formatInputLabel(inputGenerators[name]())})`
         }),
         r('div', {
             className: 'm-500 test-buttons',
@@ -116,10 +194,24 @@ const renderTest = (name, wasmFns, jsFns) => r('div', {
                     }
                 }),
                 r('button', {
+                    className: 'run-btn run-10 js',
+                    innerText: 'run js (10 times)',
+                    listeners: {
+                        'click': get10TestEventListener(container, jsFns, name, 'js')
+                    }
+                }),
+                r('button', {
                     className: 'run-btn wasm',
                     innerText: 'run wasm',
                     listeners: {
                         'click': getTestEventListener(container, wasmFns, name, 'wasm')
+                    }
+                }),
+                r('button', {
+                    className: 'run-btn run-10 wasm',
+                    innerText: 'run wasm (10 times)',
+                    listeners: {
+                        'click': get10TestEventListener(container, wasmFns, name, 'wasm')
                     }
                 }),
             ]
@@ -142,14 +234,18 @@ const renderTest = (name, wasmFns, jsFns) => r('div', {
 // initRunService :: (HTMLElement, [String], Object, Object) -> RunService
 const initRunService = (container, names, wasmFns, jsFns) => {
 
-    names.forEach(name => {
-        container.appendChild(renderTest(name, wasmFns, jsFns));
+    const containers = names.map(name => renderTest(name, wasmFns, jsFns));
+
+    const runAllBtn = document.querySelector('#run-all-btn');
+
+    runAllBtn.addEventListener('click', e => {
+        runSuite(containers, jsFns, wasmFns)
     })
 
-    return {
-        runAll: () => {
-            
-        }
-    }
-}   
+    containers.forEach(el => {
+        container.appendChild(el);
+    })
+
+    
+}
 

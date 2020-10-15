@@ -57,3 +57,55 @@ pub fn eratosthenes(n: usize) -> Vec<i32> {
 
     return out;
 }
+
+
+
+fn merge(a: Vec<i32>, b: Vec<i32>) -> Vec<i32> {
+    let mut i = 0;
+    let mut j = 0;
+
+    let length = a.len() + b.len() as usize;
+
+    let mut v = Vec::new();
+
+    while i < a.len() || j < b.len() {
+        if i >= a.len() {
+            v.push(b[j]);
+            j += 1;
+            continue;
+        }
+
+        if j >= b.len() {
+            v.push(a[i]);
+            i += 1;
+            continue;
+        }
+
+        if a[i] < b[j] {
+            v.push(a[i]);
+            i += 1;
+        }else{
+            v.push(b[j]);
+            j += 1;
+        }
+    }
+
+    return v;
+}
+
+#[wasm_bindgen]
+pub fn merge_sort(mut a: Vec<i32>) -> Vec<i32>{
+    if a.len() == 1 {
+        return a;
+    }
+
+    let i = ((a.len() / 2) as f64).floor() as usize;
+    let b = a.split_off(i);
+
+    return merge(merge_sort(a), merge_sort(b)) ;
+}
+
+
+pub fn get_some_vec() -> Vec<i32>{
+    return vec![5; 5]; 
+}
