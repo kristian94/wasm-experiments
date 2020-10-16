@@ -24,6 +24,11 @@ export function eratosthenes(n: number): Int32Array;
 * @returns {Int32Array}
 */
 export function merge_sort(a: Int32Array): Int32Array;
+/**
+* @param {Float32Array} array
+* @returns {number}
+*/
+export function array_reverse(array: Float32Array): number;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
@@ -34,6 +39,7 @@ export interface InitOutput {
   readonly is_prime: (a: number) => number;
   readonly eratosthenes: (a: number, b: number) => void;
   readonly merge_sort: (a: number, b: number, c: number) => void;
+  readonly array_reverse: (a: number, b: number) => number;
   readonly __wbindgen_malloc: (a: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number) => number;
   readonly __wbindgen_free: (a: number, b: number) => void;
