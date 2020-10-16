@@ -163,6 +163,31 @@ export function merge_sort(a) {
     }
 }
 
+let cachegetFloat32Memory0 = null;
+function getFloat32Memory0() {
+    if (cachegetFloat32Memory0 === null || cachegetFloat32Memory0.buffer !== wasm.memory.buffer) {
+        cachegetFloat32Memory0 = new Float32Array(wasm.memory.buffer);
+    }
+    return cachegetFloat32Memory0;
+}
+
+function passArrayF32ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 4);
+    getFloat32Memory0().set(arg, ptr / 4);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
+}
+/**
+* @param {Float32Array} array
+* @returns {number}
+*/
+export function array_reverse(array) {
+    var ptr0 = passArrayF32ToWasm0(array, wasm.__wbindgen_malloc);
+    var len0 = WASM_VECTOR_LEN;
+    var ret = wasm.array_reverse(ptr0, len0);
+    return ret;
+}
+
 async function load(module, imports) {
     if (typeof Response === 'function' && module instanceof Response) {
 

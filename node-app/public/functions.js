@@ -79,9 +79,34 @@ const merge_sort = array => {
     return merge(merge_sort(array.slice(0, i)), merge_sort(array.slice(i)))
 }
 
+const array_reverse = function(array) {
+    for (let round = 0; round < 999; ++round) {
+        for (let i = 0; i < array.length / 2; ++i) {
+            swap(array, i, array.length - i - 1);
+        }
+    }
+
+    return checksum(array)
+}
+
+function swap(array, i1, i2) {
+    const tmp = array[i1];
+    array[i1] = array[i2];
+    array[i2] = tmp;
+}
+
+function checksum(array) {
+    let result = 0.0;
+    for (let i = 0; i < array.length; i++) {
+        result += array[i];
+    }
+    return result;
+}
+
 const jsFns = {
     fib,
     // is_prime,
     eratosthenes,
-    merge_sort
+    merge_sort,
+    array_reverse
 }

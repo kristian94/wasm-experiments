@@ -7,6 +7,13 @@ const getNRandArray = (n) => {
     return out;
 }
 
+const getNRandFloatArray = (n) => {
+    const out = [];
+    for(let i = 0; i < n; i++){
+        out.push(parseFloat(Math.random().toFixed(6)));
+    }
+    return out;
+}
 
 const inputGenerators = {
     fib: () => 40,
@@ -14,5 +21,9 @@ const inputGenerators = {
     merge_sort: (() => {
         const a = getNRandArray(10 ** 6);
         return () => a;
-    })()
+    })(),
+    array_reverse: (() => {
+        const a = getNRandFloatArray(10 ** 6)
+        return () => a;
+    })(),
 };

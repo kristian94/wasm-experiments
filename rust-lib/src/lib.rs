@@ -109,3 +109,27 @@ pub fn merge_sort(mut a: Vec<i32>) -> Vec<i32>{
 pub fn get_some_vec() -> Vec<i32>{
     return vec![5; 5]; 
 }
+
+#[wasm_bindgen]
+pub fn array_reverse(mut array: Vec<f32>) -> f32 {
+    let len = array.len();
+
+    for _ in 0..999 {
+        // build in `array.reverse()` is the same perf
+        for i in 0..(len / 2) {
+            let tmp = array[len-i-1]; 
+            array[len-i-1] = array[i];
+            array[i] = tmp;
+        }
+    }
+
+    return checksum(array)
+}
+
+fn checksum(array: Vec<f32>) -> f32 {
+    let mut sum: f32 = 0.0;
+    for i in array {
+        sum += i
+    }
+    return sum
+}
