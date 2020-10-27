@@ -105,7 +105,6 @@ function checksum(array) {
 
 const jsFns = {
     fib,
-    // is_prime,
     eratosthenes,
     merge_sort,
     array_reverse

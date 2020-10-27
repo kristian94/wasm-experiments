@@ -75,12 +75,12 @@ const getNameFromContainer = container => container.getAttribute('data-test')
 const getTargetFromContainer = (container, type) => container.querySelector(`.run-btn.run-10.${type}`)
 
 // runSuite :: ([HTMLElement], Object, Object) -> Promise [Any] Error
-const runSuite = (containers, jsFns, wasmFns, goFns) => {
-    const types = ['js', 'wasm', 'go'];
+const runSuite = (containers, jsFns, rustFns, goFns) => {
+    const types = ['js', 'rust', 'go'];
 
-    fns = {
+    const fns = {
         js: jsFns,
-        wasm: wasmFns,
+        rust: rustFns,
         go: goFns
     }
 
@@ -88,11 +88,6 @@ const runSuite = (containers, jsFns, wasmFns, goFns) => {
         const target = getTargetFromContainer(container, type);
         return runTestN(container, fns[type], getNameFromContainer(container), type, target, 10);
     }), Promise.resolve())), Promise.resolve())
-
-    // return Promise.all(containers.map(container => Promise.all(types.map(type => {
-    //     const target = getTargetFromContainer(container, type)
-    //     return runTestN(container, fns[type], getNameFromContainer(container), type, target, 10);
-    // }))))
 }
 
 const runTestN = (container, fns, name, type, target, n) => new Promise((resolve, reject) => {
@@ -175,7 +170,7 @@ const getTestEventListener = (container, fns, name, type) => e => runTest(contai
 const get10TestEventListener = (container, fns, name, type) => e => runTestN(container, fns, name, type, e.target, 10)
 
 // renderTest :: (String, Object, Object) -> HTMLElement
-const renderTest = (name, wasmFns, jsFns, goFns) => r('div', {
+const renderTest = (name, rustFns, jsFns, goFns) => r('div', {
     className: 'test',
     attributes: {
         'data-test': name 
@@ -187,49 +182,26 @@ const renderTest = (name, wasmFns, jsFns, goFns) => r('div', {
         r('div', {
             className: 'm-500 test-buttons',
             children: () => [
-                r('button', {
-                    className: 'run-btn js',
-                    innerText: 'run js',
+                ['js', jsFns],
+                ['rust', rustFns],
+                ['go', goFns]
+            ].map(t => {
+                const [runtimeName, fns] = t;
+                return [r('button', {
+                    className: `run-btn ${runtimeName}`,
+                    innerText: `run ${runtimeName}`,
                     listeners: {
-                        'click': getTestEventListener(container, jsFns, name, 'js')
+                        'click': getTestEventListener(container, fns, name, runtimeName)
                     }
                 }),
                 r('button', {
-                    className: 'run-btn run-10 js',
-                    innerText: 'run js (10 times)',
+                    className: `run-btn run-10 ${runtimeName}`,
+                    innerText: `run ${runtimeName} (10 times)`,
                     listeners: {
-                        'click': get10TestEventListener(container, jsFns, name, 'js')
+                        'click': get10TestEventListener(container, fns, name, runtimeName)
                     }
-                }),
-                r('button', {
-                    className: 'run-btn wasm',
-                    innerText: 'run wasm',
-                    listeners: {
-                        'click': getTestEventListener(container, wasmFns, name, 'wasm')
-                    }
-                }),
-                r('button', {
-                    className: 'run-btn run-10 wasm',
-                    innerText: 'run wasm (10 times)',
-                    listeners: {
-                        'click': get10TestEventListener(container, wasmFns, name, 'wasm')
-                    }
-                }),
-                r('button', {
-                    className: 'run-btn go',
-                    innerText: 'run go',
-                    listeners: {
-                        'click': getTestEventListener(container, goFns, name, 'go')
-                    }
-                }),
-                r('button', {
-                    className: 'run-btn run-10 go',
-                    innerText: 'run go (10 times)',
-                    listeners: {
-                        'click': get10TestEventListener(container, goFns, name, 'go')
-                    }
-                }),
-            ]
+                })]
+            }).reduce((a, b) => a.concat(b), [])
         }),
         r('h4', {
             innerText: 'results'
@@ -239,8 +211,8 @@ const renderTest = (name, wasmFns, jsFns, goFns) => r('div', {
             children: () => [
                 r('div', { className: 'label js', innerText: 'js' }),
                 r('div', { className: 'value js', }),
-                r('div', { className: 'label wasm', innerText: 'wasm' }),
-                r('div', { className: 'value wasm', }),
+                r('div', { className: 'label rust', innerText: 'rust' }),
+                r('div', { className: 'value rust', }),
                 r('div', { className: 'label go', innerText: 'go' }),
                 r('div', { className: 'value go', }),
             ]
@@ -249,14 +221,14 @@ const renderTest = (name, wasmFns, jsFns, goFns) => r('div', {
 })
 
 // initRunService :: (HTMLElement, [String], Object, Object) -> RunService
-const initRunService = (container, names, wasmFns, jsFns, goFns) => {
+const initRunService = (container, names, rustFns, jsFns, goFns) => {
 
-    const containers = names.map(name => renderTest(name, wasmFns, jsFns, goFns));
+    const containers = names.map(name => renderTest(name, rustFns, jsFns, goFns));
 
     const runAllBtn = document.querySelector('#run-all-btn');
 
     runAllBtn.addEventListener('click', e => {
-        runSuite(containers, jsFns, wasmFns, goFns)
+        runSuite(containers, jsFns, rustFns, goFns)
     })
 
     containers.forEach(el => {

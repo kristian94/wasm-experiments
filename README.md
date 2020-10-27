@@ -1,6 +1,6 @@
 # wasm-experiments
 
-project for comparing in-browser performance of JS and wasm (compiled from rust)
+project for comparing in-browser performance of JavaScript and wasm (compiled from Rust and Golang)
 
 ## 1. setup
 
@@ -33,7 +33,7 @@ will be implemented in both js and wasm, and timed in the browser.
 ### 2.1 functions
 - fib
 - mergeSort
-- ... and the rest
+- ... and the rest of the gang
 
 ---
 ### 2.2 adding functions
@@ -48,6 +48,10 @@ add the function to ````rust-lib/src/lib.rs```` and make sure it is annotated wi
 
 make sure you recompile the rust package after adding a new function (see section 1.2)
 
+Make sure the name of the function matches the equivalent javascript function (if not, it wont
+be shown in the application UI)
+
 #### 2.2.3 input-generators
 
 navigate to ````node-app/public/input-generators.js````. As the name suggests, this file generates input values for the tested functions. Add a property to the ````inputGenerators```` object, where the key matches  the name of the test function, and the value is a function that returns a value, that the function can be tested with
+
