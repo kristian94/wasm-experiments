@@ -75,12 +75,13 @@ const getNameFromContainer = container => container.getAttribute('data-test')
 const getTargetFromContainer = (container, type) => container.querySelector(`.run-btn.run-10.${type}`)
 
 // runSuite :: ([HTMLElement], Object, Object) -> Promise [Any] Error
-const runSuite = (containers, jsFns, wasmFns) => {
-    const types = ['js', 'wasm'];
+const runSuite = (containers, jsFns, wasmFns, goFns) => {
+    const types = ['js', 'wasm', 'go'];
 
     fns = {
         js: jsFns,
-        wasm: wasmFns
+        wasm: wasmFns,
+        go: goFns
     }
 
     containers.reduce((prom, container) => prom.then(_ => types.reduce((_prom, type) => _prom.then(__ => {
@@ -174,7 +175,7 @@ const getTestEventListener = (container, fns, name, type) => e => runTest(contai
 const get10TestEventListener = (container, fns, name, type) => e => runTestN(container, fns, name, type, e.target, 10)
 
 // renderTest :: (String, Object, Object) -> HTMLElement
-const renderTest = (name, wasmFns, jsFns) => r('div', {
+const renderTest = (name, wasmFns, jsFns, goFns) => r('div', {
     className: 'test',
     attributes: {
         'data-test': name 
@@ -214,6 +215,20 @@ const renderTest = (name, wasmFns, jsFns) => r('div', {
                         'click': get10TestEventListener(container, wasmFns, name, 'wasm')
                     }
                 }),
+                r('button', {
+                    className: 'run-btn go',
+                    innerText: 'run go',
+                    listeners: {
+                        'click': getTestEventListener(container, goFns, name, 'go')
+                    }
+                }),
+                r('button', {
+                    className: 'run-btn run-10 go',
+                    innerText: 'run go (10 times)',
+                    listeners: {
+                        'click': get10TestEventListener(container, goFns, name, 'go')
+                    }
+                }),
             ]
         }),
         r('h4', {
@@ -226,20 +241,22 @@ const renderTest = (name, wasmFns, jsFns) => r('div', {
                 r('div', { className: 'value js', }),
                 r('div', { className: 'label wasm', innerText: 'wasm' }),
                 r('div', { className: 'value wasm', }),
+                r('div', { className: 'label go', innerText: 'go' }),
+                r('div', { className: 'value go', }),
             ]
         })
     ]
 })
 
 // initRunService :: (HTMLElement, [String], Object, Object) -> RunService
-const initRunService = (container, names, wasmFns, jsFns) => {
+const initRunService = (container, names, wasmFns, jsFns, goFns) => {
 
-    const containers = names.map(name => renderTest(name, wasmFns, jsFns));
+    const containers = names.map(name => renderTest(name, wasmFns, jsFns, goFns));
 
     const runAllBtn = document.querySelector('#run-all-btn');
 
     runAllBtn.addEventListener('click', e => {
-        runSuite(containers, jsFns, wasmFns)
+        runSuite(containers, jsFns, wasmFns, goFns)
     })
 
     containers.forEach(el => {

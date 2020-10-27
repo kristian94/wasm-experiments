@@ -32,7 +32,6 @@
         const obj = await WebAssembly.instantiate(buffer, go.importObject);
         go.run(obj.instance);
       }
-      fetchAndInstantiate()
 
       // Use ES module import syntax to import functionality from the module
       // that we have compiled.
@@ -72,6 +71,7 @@
         // exports which is the same as importing the `*_bg` module in other
         // modes
         await init();
+        await fetchAndInstantiate()
 
         window.wasmFns = wasmFns;
 
@@ -79,7 +79,8 @@
           document.querySelector('.tests'),
           Object.keys(jsFns),
           wasmFns,
-          jsFns
+          jsFns,
+          goFns
         )
       }
 

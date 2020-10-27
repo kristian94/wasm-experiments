@@ -6,7 +6,6 @@ import (
 )
 
 func main() {
-	// https://github.com/webpack/webpack/issues/6433
 	fns := make(map[string]interface{})
 	fns["array_reverse"] = arrayReverse()
 	fns["fib"] = fibWrap()
@@ -80,14 +79,12 @@ func arrayReverse() js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		array := args[0]
 		arrayLen := array.Length()
-		// for round := 0; round < 999; round++ {
-		for i := 0; i < arrayLen/2; i++ {
-			swap(array, i, arrayLen-i-1)
+		for round := 0; round < 10; round++ { // Coresponding functions use 0->999
+			for i := 0; i < arrayLen/2; i++ {
+				swap(array, i, arrayLen-i-1)
+			}
 		}
-		// }
-
-		// return checksum(array)
-		return array
+		return checksum(array)
 	})
 }
 
@@ -97,7 +94,7 @@ func swap(array js.Value, i int, j int) {
 	array.SetIndex(j, ai)
 }
 
-func checkSum(array js.Value) (sum float64) {
+func checksum(array js.Value) (sum float64) {
 	for i := 0; i < array.Length(); i++ {
 		sum += array.Index(i).Float()
 	}
