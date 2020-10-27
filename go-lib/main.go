@@ -53,7 +53,7 @@ func mergeSort() js.Func {
 
 func fibWrap() js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		return fibFast(args[0].Int())
+		return fib(args[0].Int())
 	})
 }
 

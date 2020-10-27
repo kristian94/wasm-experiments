@@ -25,12 +25,14 @@
 
     <!-- Note the usage of `type=module` here as this is an ES6 module -->
     <script type="module">
-      if (WebAssembly.instantiateStreaming) { 
-        const go = new Go();
-        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
-          go.run(result.instance);
-        });
+      const go = new Go();
+      async function fetchAndInstantiate() {
+        const response = await fetch("main.wasm");
+        const buffer = await response.arrayBuffer();
+        const obj = await WebAssembly.instantiate(buffer, go.importObject);
+        go.run(obj.instance);
       }
+      fetchAndInstantiate()
 
       // Use ES module import syntax to import functionality from the module
       // that we have compiled.
