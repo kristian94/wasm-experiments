@@ -18,12 +18,20 @@
         <div>Kristian Nielsen</div>
       </footer>
     </div>
+    <script src="wasm_exec.js"></script>
     <script src="input-generators.js"></script>
     <script src="functions.js"></script>
     <script src="run-service.js"></script>
 
     <!-- Note the usage of `type=module` here as this is an ES6 module -->
     <script type="module">
+      if (WebAssembly.instantiateStreaming) { 
+        const go = new Go();
+        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+          go.run(result.instance);
+        });
+      }
+
       // Use ES module import syntax to import functionality from the module
       // that we have compiled.
       //
