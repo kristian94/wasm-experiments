@@ -9,6 +9,19 @@
       <p>comparing wasm and js performance</p>
       <hr class="m-600">
       <div class="suite-menu m-600">
+        <div>
+          <label for="cpu">cpu</label>
+          <input id="cpu" type="text" name="cpu" placeholder="Intel Core i7-6700K @ 4.00GHz">
+        </div>
+        <div>
+          <label for="ram">ram (gb)</label>
+          <input id="ram" type="text" name="ram" placeholder="8">
+        </div>
+        <div>
+          <label for="name">your name</label>
+          <input id="name" type="text" name="name">
+        </div>
+        <button id="post-results-btn">Post results to db</button>
         <button id="run-all-btn">Run suite (will take a few minutes)</button>
       </div>
       <div class="tests"></div>

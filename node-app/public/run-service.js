@@ -1,8 +1,4 @@
 /**
- *  RunService :: {
- *      runTest: (string) -> TimerResult
- *  }
- * 
  *  RenderOptions :: {
  *      className: String,
  *      innerText: String,
@@ -10,6 +6,59 @@
  *      listeners: Object,      (keys are event names eg 'click', values are functions)
  *  }
  */
+
+
+const testDataStore = Object.keys(jsFns).reduce((obj, key) => Object.assign(obj, {[key]: {
+    js: [],
+    rust: [],
+    go: []
+}}), {});
+
+const postResults = () => {
+
+    if(!testDataStore.cpu || !testDataStore.cpu){
+        alert('Input cpu and ram')
+        return;
+    }
+
+    // if(!Object.keys(jsFns).reduce((last, key) => last && ['js', 'rust', 'go'].reduce((last, _key) => last && testDataStore[key][_key].length > 0, true), true)){
+    //     alert('Not all tests are run')
+    //     return;
+    // }
+
+    fetch('/experiments', {
+        method: 'POST',
+        body: JSON.stringify(testDataStore),
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    })
+}
+
+(() => {
+    const checkStorage = (name) => {
+        const value = localStorage.getItem(name)
+        const input = document.getElementById(name);
+
+        if(value){
+            input.value = value;
+            testDataStore[name] = value;
+        };
+
+        const handler = () => {
+            testDataStore[name] = input.value;
+            localStorage.setItem(name, input.value);
+        }
+
+        input.onkeydown = handler
+        input.onchange = handler
+    }
+
+    ['cpu', 'ram', 'name'].forEach(checkStorage)
+
+    const postBtn = document.getElementById('post-results-btn')
+    postBtn.onclick = postResults;
+})();
 
 const isTypedIntArray = x => !!x && x.constructor && /Int\d+Array/.test(x.constructor.name)
 
@@ -88,6 +137,9 @@ const runSuite = (containers, jsFns, rustFns, goFns) => {
         const target = getTargetFromContainer(container, type);
         return runTestN(container, fns[type], getNameFromContainer(container), type, target, 10);
     }), Promise.resolve())), Promise.resolve())
+        .catch(err => {
+            console.error(err)
+        })
 }
 
 const runTestN = (container, fns, name, type, target, n) => new Promise((resolve, reject) => {
@@ -101,10 +153,8 @@ const runTestN = (container, fns, name, type, target, n) => new Promise((resolve
 
         const testFn = fns[name];
         if(!testFn){
-            const errorMessage = `no test named "${name}" found in object: ${fns}`
-            errorHandler(new Error(errorMessage))
-            console.error(errorMessage)
-            reject()
+            console.error(`no test named "${name}" found in object: ${fns}`)
+            resolve()
             return;
         }
     
@@ -124,6 +174,7 @@ const runTestN = (container, fns, name, type, target, n) => new Promise((resolve
                 if(rem > 0){
                     const {elapsed, value} = timed(() => testFn(input));
                     results.push({elapsed, value});
+                    testDataStore[name][type].push(elapsed);
                     _go(rem - 1);
                 }else{
                     finalize()
@@ -150,13 +201,13 @@ const runTest = (container, fns, name, type, target) => {
         const testFn = fns[name];
         if(!testFn){
             const errorMessage = `no test named "${name}" found in object: ${fns}`
-            errorHandler(new Error(errorMessage))
             console.error(errorMessage)
             finalize();
             return;
         }
     
         const {elapsed, value} = timed(() => testFn(input));
+        testDataStore[name][type].push(elapsed);
         console.log(`${name} finished with value<${typeof value}>:`, value)
         valueEl.innerHTML = `${formatResult(value)}<br>${elapsed} ms`;
         finalize();
@@ -220,7 +271,7 @@ const renderTest = (name, rustFns, jsFns, goFns) => r('div', {
     ]
 })
 
-// initRunService :: (HTMLElement, [String], Object, Object) -> RunService
+// initRunService :: (HTMLElement, [String], Object, Object) -> ()
 const initRunService = (container, names, rustFns, jsFns, goFns) => {
 
     const containers = names.map(name => renderTest(name, rustFns, jsFns, goFns));
@@ -234,7 +285,4 @@ const initRunService = (container, names, rustFns, jsFns, goFns) => {
     containers.forEach(el => {
         container.appendChild(el);
     })
-
-    
 }
-

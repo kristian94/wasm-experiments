@@ -1,0 +1,95 @@
+const init = (app) => {
+    const tryRequire = moduleName => {
+        try{
+            return require(moduleName)
+        }catch(err){
+            console.info(`Module ${moduleName} missing. Program will continue to run, but features depending on the module will be disabled`)
+            return null;
+        }
+    }
+    
+    const mongo = tryRequire('mongodb');
+    if(!mongo) return;
+
+    const { MongoClient } = mongo;
+    require('dotenv').config()
+    const bodyParser = require('body-parser')
+
+    const uaParser = require('ua-parser-js');
+
+    const { DB_USER, DB_PASS, DB_NAME } = process.env;
+
+    const user = encodeURIComponent(DB_USER);
+    const password = encodeURIComponent(DB_PASS);
+    const authMechanism = 'DEFAULT';
+
+    const url = `mongodb://${user}:${password}@localhost:27017/${DB_NAME}`;
+
+    const client = new MongoClient(url, { useUnifiedTopology: true });
+
+    client.connect(err => {
+        if(err){
+            console.error('Mongo connection failed')
+            console.error(err)
+            return;
+        }
+
+        const db = client.db(DB_NAME);
+
+        const Experiments = db.collection('experiments');
+
+        /**
+         *  Body {
+         *      fib: {
+         *          js: Number,
+         *          rust: Number,
+         *          go: Number
+         *      },
+         *      ... (eratosthenes, merge_sort, array_reverse)
+         *      name: String,
+         *      cpu: String,
+         *      ram: String,
+         *  }
+         * 
+         */
+        app.post('/experiments', bodyParser.json(), (req, res, next) => {
+            const missingKeys = [ 'fib', 'eratosthenes', 'merge_sort', 'array_reverse' ].filter(key => req.body[key] == null)
+
+            console.log(req.body)
+
+            if(missingKeys.length > 0){
+                return res.status(400).json({
+                    message: `Following keys missing from body: ${missingKeys.join(', ')}`
+                })
+            }
+            const parsedUA = uaParser(req.headers['user-agent']);
+            console.log(parsedUA)
+            const { browser, os, engine, ua } = parsedUA;
+            const { architecture } = parsedUA.cpu
+
+            const document = Object.assign({}, req.body, {
+                browser,
+                os,
+                engine,
+                architecture,
+                userAgent: ua
+            })
+
+            console.log('inserting document:', document);
+
+            Experiments.insertOne(document, (err, result) => {
+                if(err){
+                    res.status(500).json({err})
+                    return 
+                }
+
+                res.json({});
+            })
+        })
+    })
+}
+
+
+module.exports = {
+    init
+}

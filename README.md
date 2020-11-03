@@ -58,3 +58,36 @@ be shown in the application UI)
 
 navigate to ````node-app/public/input-generators.js````. As the name suggests, this file generates input values for the tested functions. Add a property to the ````inputGenerators```` object, where the key matches  the name of the test function, and the value is a function that returns a value, that the function can be tested with
 
+### 3 mongo
+
+#### 3.1 adding a mongo user
+
+Having installed mongo, and the mongo shell, start up a new shell session. The application needs a user, type the following commands (replacing the <tags> with the correct values)
+
+````
+use <db>
+
+db.createUser({
+   user: "<name>",
+   pwd: "<pass>",
+   roles: [
+      { role: "readWrite", db: "<db>" }
+   ]
+})
+````
+
+values used should correspond to your local .env file. The user created will only have access to the defined db.
+
+Example with values from the default .env:
+
+````
+use wasmexp
+
+db.createUser({
+   user: "bois",
+   pwd: "denerbra",
+   roles: [
+      { role: "readWrite", db: "wasmexp" }
+   ]
+})
+````

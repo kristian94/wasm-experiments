@@ -1,7 +1,11 @@
+// 3rd party deps
 const express = require('express');
 const app = express();
 const path = require('path');
 const morgan = require('morgan');
+
+// local deps
+const DbService = require('./db-service')
 
 /**
  * add folders, containing output of wasm builds, to this array
@@ -26,6 +30,8 @@ buildFolders.forEach(t => {
         res.sendFile(req.params.fileName, {root: dir});
     })
 })
+
+DbService.init(app);
 
 app.listen(8080, () => {
     console.log('listening on 8080')
