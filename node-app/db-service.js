@@ -98,7 +98,7 @@ const init = (app) => {
             return docs.map(doc => {
                 ['fib', 'eratosthenes', 'merge_sort', 'array_reverse'].forEach(k => {
                     ['js', 'rust', 'go'].forEach(_k => {
-                        doc[k][_k] = fn(doc[k][_k]);
+                        doc[k][_k] = fn(doc[k][_k], doc, k, _k);
                     })
                 })
                 return doc;
@@ -114,8 +114,14 @@ const init = (app) => {
                     sd: standardDeviation(numbers)
                 }))
 
-                console.log('results:', _results);
-                res.json(_results);
+                const __results = mapExperimentResults(results, (obj, doc, k, _k) => {
+                    if(_k == 'js') return obj;
+
+                    obj.relativeMean = obj.mean / doc[k].js.mean;
+                    return obj;
+                })
+
+                res.json(__results);
             })
         })
     })
