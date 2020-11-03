@@ -21,10 +21,10 @@ const postResults = () => {
         return;
     }
 
-    // if(!Object.keys(jsFns).reduce((last, key) => last && ['js', 'rust', 'go'].reduce((last, _key) => last && testDataStore[key][_key].length > 0, true), true)){
-    //     alert('Not all tests are run')
-    //     return;
-    // }
+    if(!Object.keys(jsFns).reduce((last, key) => last && ['js', 'rust', 'go'].reduce((last, _key) => last && testDataStore[key][_key].length > 0, true), true)){
+        alert('Not all tests are run')
+        return;
+    }
 
     fetch('/experiments', {
         method: 'POST',
