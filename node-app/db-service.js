@@ -86,6 +86,38 @@ const init = (app) => {
                 res.json({});
             })
         })
+
+        const add = (x, y) => x + y;
+
+        const mean = numbers => numbers.reduce(add, 0) / numbers.length;
+
+        const standardDeviation = numbers => Math.sqrt(numbers.map(x => (x - mean(numbers)) ** 2).reduce(add, 0) / (numbers.length - 1));
+
+        // mapExperimentResults :: (Document[], Number[] -> Any) -> Document[]
+        const mapExperimentResults = (docs, fn) => {
+            return docs.map(doc => {
+                ['fib', 'eratosthenes', 'merge_sort', 'array_reverse'].forEach(k => {
+                    ['js', 'rust', 'go'].forEach(_k => {
+                        doc[k][_k] = fn(doc[k][_k]);
+                    })
+                })
+                return doc;
+            })
+        }
+
+        app.get('/experiments', (req, res, next) => {
+            Experiments.find({}).toArray((err, results) => {
+                if(err){}
+                
+                const _results = mapExperimentResults(results, numbers => ({
+                    mean: mean(numbers),
+                    sd: standardDeviation(numbers)
+                }))
+
+                console.log('results:', _results);
+                res.json(_results);
+            })
+        })
     })
 }
 
