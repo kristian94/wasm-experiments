@@ -18,7 +18,7 @@
         <div>Kristian Nielsen</div>
       </footer>
     </div>
-    <script src="wasm_exec.js"></script>
+    <script src="go_wasm_exec.js"></script>
     <script src="input-generators.js"></script>
     <script src="functions.js"></script>
     <script src="run-service.js"></script>
@@ -27,7 +27,7 @@
     <script type="module">
       const go = new Go();
       async function fetchAndInstantiate() {
-        const response = await fetch("main.wasm");
+        const response = await fetch("go.wasm");
         const buffer = await response.arrayBuffer();
         const obj = await WebAssembly.instantiate(buffer, go.importObject);
         go.run(obj.instance);
