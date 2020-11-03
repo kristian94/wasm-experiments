@@ -16,13 +16,16 @@ run all commands from ````./node-app````
 3. files in ````./node-app/public```` and ````./rust-lib/pkg```` are now
    served on ````localhost:8080````
 
-### 1.2 compiling Rust to WASM
+### 1.2 Compiling Rust to WASM
 run all command from ````./rust-lib````
 
 1. modify files in src as wanted
 2. run ````wasm-pack build --target web````
 3. if you created new files, make sure these are imported in ````node-app/public/index.html````
 
+### 1.3 Compiling Go to WASM
+1. modify go files in go-lib directory.
+2. run `./build-wasm.sh` to build wasm module and js bindings. Output is placed in `node-app/public/`
 
 ## 2. experiments
 
