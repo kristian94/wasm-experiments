@@ -10,10 +10,69 @@ func main() {
 	fns["array_reverse"] = arrayReverse()
 	fns["fib"] = fibWrap()
 	fns["eratosthenes"] = eratosthenes()
+	fns["merge_sort"] = mergeSortWrapper()
 
 	js.Global().Set("goFns", fns)
 
 	select {}
+}
+
+func convertJsArrayToIntSlice(jsArr js.Value) []int {
+	size := jsArr.Length()
+	arr := make([]int, size, size)
+	for i := 0; i < len(arr); i++ {
+		arr[i] = jsArr.Index(i).Int()
+	}
+	return arr
+}
+
+func merge(left, right []int) []int {
+	size, i, j := len(left)+len(right), 0, 0
+	result := make([]int, size, size)
+
+	for k := 0; k < size; k++ {
+		if i > len(left)-1 && j <= len(right)-1 {
+			result[k] = right[j]
+			j++
+		} else if j > len(right)-1 && i <= len(left)-1 {
+			result[k] = left[i]
+			i++
+		} else if left[i] < right[j] {
+			result[k] = left[i]
+			i++
+		} else {
+			result[k] = right[j]
+			j++
+		}
+	}
+	return result
+}
+
+func mergeSort(array []int) []int {
+	if len(array) == 1 {
+		return array
+	}
+	mid := len(array) / 2
+	return merge(mergeSort(array[:mid]), mergeSort(array[mid:]))
+}
+
+func mergeSortWrapper() js.Func {
+	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		if args[0].Length() <= 1 {
+			return args[0]
+		}
+		array := convertJsArrayToIntSlice(args[0])
+		result := mergeSort(array)
+		return convertToInterfaceSlice(result)
+	})
+}
+
+func convertToInterfaceSlice(arr []int) []interface{} {
+	res := make([]interface{}, len(arr), len(arr))
+	for i := range arr {
+		res[i] = arr[i]
+	}
+	return res
 }
 
 func eratosthenes() js.Func {
@@ -41,12 +100,6 @@ func eratosthenes() js.Func {
 		}
 
 		return output
-	})
-}
-
-func mergeSort() js.Func {
-	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		return 0
 	})
 }
 
