@@ -26,6 +26,15 @@ func convertJsArrayToIntSlice(jsArr js.Value) []int {
 	return arr
 }
 
+func convertJsArrayToFloatSlice(jsArr js.Value) []float64 {
+	size := jsArr.Length()
+	arr := make([]float64, size, size)
+	for i := 0; i < len(arr); i++ {
+		arr[i] = jsArr.Index(i).Float()
+	}
+	return arr
+}
+
 func merge(left, right []int) []int {
 	size, i, j := len(left)+len(right), 0, 0
 	result := make([]int, size, size)
@@ -130,26 +139,39 @@ func fibFast(n int) int {
 
 func arrayReverse() js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		array := args[0]
-		arrayLen := array.Length()
-		for round := 0; round < 10; round++ { // Coresponding functions use 0->999
-			for i := 0; i < arrayLen/2; i++ {
-				swap(array, i, arrayLen-i-1)
+		array := convertJsArrayToFloatSlice(args[0])
+		length := len(array)
+		for round := 0; round < 999; round++ {
+			for i := 0; i < len(array)/2; i++ {
+				swap(array, i, length-i-1)
 			}
 		}
 		return checksum(array)
 	})
 }
 
-func swap(array js.Value, i int, j int) {
+func jsSwap(array js.Value, i int, j int) {
 	ai := array.Index(i)
 	array.SetIndex(i, array.Index(j))
 	array.SetIndex(j, ai)
 }
 
-func checksum(array js.Value) (sum float64) {
+func jsChecksum(array js.Value) (sum float64) {
 	for i := 0; i < array.Length(); i++ {
 		sum += array.Index(i).Float()
+	}
+	return
+}
+
+func swap(array []float64, i int, j int) {
+	ai := array[i]
+	array[i] = array[j]
+	array[j] = ai
+}
+
+func checksum(array []float64) (sum float64) {
+	for i := 0; i < len(array); i++ {
+		sum += array[i]
 	}
 	return
 }
