@@ -126,34 +126,25 @@ const init = (app) => {
                 res.json(__results);
             })
         })
-
         app.get('/experiments/:fn', (req, res, next) => {
             Experiments.find({}).toArray((err, results) => {
                 if(err){ return res.json({err}) }
                 
                 const {fn} = req.params;
 
-                /* 
-                    ExpEntry {
-                        fib: {js, rust, go} (Object Number),
-                        erato... -||-,
-                        merge_sort: -||-,
-                        array_reverse: -||-,
-                        name,
-                        cpu,
-                        ram,
-                        browser,
-                        os,
-                        ...
-                    }
-                */
-
-                // desired:
-                // [os, browser, jsTime, rustTime, goTime]
-
                 console.log(results)
 
-                res.json(results.map(r => [r.os, r.browser, mean(r[fn].js), mean(r[fn].rust), mean(r[fn].go)]));
+                res.json(results.map(r => [
+                    r.name,
+                    r.os, 
+                    r.browser, 
+                    mean(r[fn].js), 
+                    mean(r[fn].rust), 
+                    mean(r[fn].go),
+                    standardDeviation(r[fn].js), 
+                    standardDeviation(r[fn].rust), 
+                    standardDeviation(r[fn].go),
+                ]));
             })
         })
 
