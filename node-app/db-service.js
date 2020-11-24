@@ -130,17 +130,20 @@ const init = (app) => {
             Experiments.find({}).toArray((err, results) => {
                 if(err){ return res.json({err}) }
                 
-                const {fn} = req.params;
+                const { fn } = req.params;
+                const { round } = Math;
+
 
                 console.log(results)
+
 
                 res.json(results.map(r => [
                     r.name,
                     r.os, 
                     r.browser, 
-                    mean(r[fn].js), 
-                    mean(r[fn].rust), 
-                    mean(r[fn].go),
+                    round(mean(r[fn].js)), 
+                    round(mean(r[fn].rust)), 
+                    round(mean(r[fn].go)),
                     standardDeviation(r[fn].js), 
                     standardDeviation(r[fn].rust), 
                     standardDeviation(r[fn].go),
