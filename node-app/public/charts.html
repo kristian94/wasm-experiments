@@ -1,0 +1,290 @@
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+    <!-- <link rel="stylesheet" href="index.css"> -->
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <style>
+      #canvas {
+        background: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div id='statChart'></div>
+    <button>Download</button>
+    <canvas id="canvas" width="750" height="300"></canvas>
+
+
+    <script>
+      const colors = ["#2D2D53", "#7CA420",  "#C24B2B"];
+
+      function Chart(width, height, id) {
+	
+        this.data = {};
+        
+        this.margin = {top: 20, right: 0, bottom:30, left: 40};
+        
+        this.width = width - this.margin.right - this.margin.left;
+        this.height = height - this.margin.top - this.margin.bottom;
+        
+        this.x = d3.scale.ordinal().rangeRoundBands([0, this.width], .7);
+        this.y = d3.scale.linear().range([this.height, 0]);
+        
+        this.xAxis = d3.svg.axis().scale(this.x).orient('bottom');
+        this.yAxis = d3.svg.axis().scale(this.y).orient('left').ticks(8);
+        
+        this.container = d3.select(id).style('background', 'white');
+        this.svg = [];
+        
+        this.colorScale = d3.scale.ordinal();
+        //set range of colors for colorScale
+        this.colorScale.range(colors);
+      }
+
+      Chart.render = function(json, chart, c) {
+        
+        // Remove any previous svg/chart element
+        chart.container.selectAll('svg').remove();
+        
+        chart.svg = chart.container.append('svg')
+            .attr('width', chart.width + chart.margin.right + chart.margin.left)
+            .attr('height', chart.height + chart.margin.top + chart.margin.bottom)
+            .style('background-color', 'white');//#efefef
+          
+        chart.data = json;
+        
+        // --------------------------------------
+        // x-y scales - based on data volume
+        // --------------------------------------
+        
+        // x-scale:
+        chart.x.domain(chart.data.map(function(d) { return d.name; }));
+
+        //retrieve all values in array
+        var items = [];
+        for (var i = 0, len1 = json.length; i < len1; i++) {
+          for (var j = 0, len2 = json[i].value.length; j < len2; j++) {
+            items = items.concat(d3.values(json[i].value[j]));	
+          }
+        }
+
+        // y-scale:
+        chart.y.domain([0, d3.max(items)]);
+        
+        // --------------------------------------
+        
+        
+        // Color Scheme domain for rectangles
+        // --------------------------------------
+        
+        var domain = [];
+        
+        for (var i = 0, len = chart.data[0].value.length; i < len; i++) {
+          domain.push(i);
+        }
+        
+        chart.colorScale.domain(domain);
+        
+        // --------------------------------------
+        
+        var g = chart.svg.append('g')
+            .attr("transform", "translate(" + (chart.margin.left + 20) + "," + chart.margin.top + ")");
+
+        //group x axis
+        g.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + chart.height + ")")
+              .call(chart.xAxis);
+
+        //group y axis
+        g.append("g")
+        .attr("class", "y axis")
+              .call(chart.yAxis)
+            .append('text')
+              .attr("transform", "rotate(-90)")
+              .attr("y", 6)
+              .attr("dy", ".71em")
+              .style("text-anchor", "end")
+              .text("Average execution time (ms)");
+
+        //group bars
+        var barsContainer = g.append("g").attr('id', 'bars');
+
+        //Data join - Append g elements to the bars element
+        var bars = barsContainer.selectAll('g')
+          .data(chart.data);
+          
+        
+
+        bars.enter().append('g')
+          .attr('transform', function(d) { return 'translate(' + (chart.x(d.name) + 1) + ',0)'; });
+        
+        // Create rects based on data
+        for (var j = 0, len = json[0].value.length; j < len; j++) {
+          
+          bars.append('rect')
+            .attr('x', function(d) { 
+                if (j === 0) return 0; 
+                else return (chart.x.rangeBand()/len) * j; 
+              })
+            .attr('width', chart.x.rangeBand()/len)
+            .attr('y', function(d) { return chart.height; })
+            .attr('height', 0)
+            .attr('fill', 'white')
+            .attr('opacity', 0.5)
+            .attr('onmouseover', '')
+            .transition()
+            .delay(function(d, i) { return i * 100; })
+            .duration(400)
+            .attr('fill', chart.colorScale(j))
+            .attr('opacity', 1)
+            .attr('y', function(d) { return chart.y(d3.values(d.value[j])); })
+            .attr('height', function(d) { return chart.height - chart.y(d3.values(d.value[j])); });
+        }
+
+        // x:  d = M0,2V0H560V2
+        // y:  d = M-2,0H0V250H-2
+
+        // slight hack to tweak the thickness of the axis lines:
+        const els = Array.from(document.querySelectorAll('path.domain'));
+            
+
+        // x
+        els[0].setAttribute('d', 'M0,2V0H560V2');
+        els[1].setAttribute('d', 'M-2,0H0V250H-2')
+
+        document.querySelector('svg').setAttribute('width', 750)
+
+        const legend = g.append('rect')
+          .attr('fill', 'none')
+          .attr('stroke', 'rgb(150,150,150)')
+          .attr('width', 80)
+          .attr('height', 100)
+          .attr('x', 580)
+
+        const baseY = 10;
+        const yDiff = 30;
+
+        ['js', 'rust', 'go'].forEach((name, i) => {
+          const y = baseY + yDiff * i;
+
+          g.append('rect')
+            .attr('fill', colors[i])
+            .attr('width', 16)
+            .attr('height', 16)
+            .attr('stroke', 'rgb(150,150,150)')
+            .attr("y", y)
+            .attr("x", 590)
+
+          g.append('text')
+            .attr("y", y + 10)
+            .attr("x", 615)
+            .text(name);
+        })        
+
+        // g.append('rect')
+        //   .attr('fill', colors[0])
+        //   .attr('width', 16)
+        //   .attr('height', 16)
+        //   .attr('stroke', 'rgb(150,150,150)')
+        //   .attr("y", 10)
+        //   .attr("x", 590)
+
+        // g.append('text')
+        //   .attr("y", 20)
+        //   .attr("x", 615)
+        //   .text('js');
+
+
+        
+        // g.append('text')
+        //   .attr("y", 40)
+        //   .attr("x", 590)
+        //   .text('rust')
+          
+
+        // .append('text')
+        //       .attr("transform", "rotate(-90)")
+        //       .attr("y", 6)
+              // .attr("dy", ".71em")
+              // .style("text-anchor", "end")
+        //       .text("Average execution time (ms)");
+
+
+
+        g.selectAll('text')
+          .style('font-family', '\'Times New Roman\', Times, serif')
+      }
+
+      
+
+      fetch('/experiments/averages').then(res => res.json()).then(json => {
+        console.log(json)
+
+        // Initialise the graph
+        var chart = new Chart(600, 300, "#statChart");
+
+        // Create some data
+        var chartData = json;	
+                          
+        // Render the chart with chartData
+        Chart.render(chartData, chart);
+      });
+
+
+
+      (() => {
+        var btn = document.querySelector('button');
+        var canvas = document.querySelector('canvas');
+
+        function triggerDownload (imgURI) {
+          var evt = new MouseEvent('click', {
+            view: window,
+            bubbles: false,
+            cancelable: true
+          });
+
+          var a = document.createElement('a');
+          a.setAttribute('download', 'MY_COOL_IMAGE.png');
+          a.setAttribute('href', imgURI);
+          a.setAttribute('target', '_blank');
+
+          a.dispatchEvent(evt);
+        }
+
+        btn.addEventListener('click', function () {
+          var svg = document.querySelector('svg');
+
+          var canvas = document.getElementById('canvas');
+          var ctx = canvas.getContext('2d');
+          var data = (new XMLSerializer()).serializeToString(svg);
+          var DOMURL = window.URL || window.webkitURL || window;
+
+          var img = new Image();
+          var svgBlob = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
+          var url = DOMURL.createObjectURL(svgBlob);
+
+          img.onload = function () {
+            ctx.drawImage(img, 0, 0);
+            DOMURL.revokeObjectURL(url);
+
+            var imgURI = canvas
+                .toDataURL('image/png')
+                .replace('image/png', 'image/octet-stream');
+
+            triggerDownload(imgURI);
+          };
+
+          img.src = url;
+        });
+      })()
+
+      
+      
+      
+
+    </script>
+    
+
+  </body>
+</html>

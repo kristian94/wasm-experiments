@@ -1,3 +1,5 @@
+const { GridFSBucketWriteStream } = require('mongodb');
+
 const init = (app) => {
     const tryRequire = moduleName => {
         try{
@@ -126,6 +128,64 @@ const init = (app) => {
                 res.json(__results);
             })
         })
+
+        /**
+         *  Response [
+         *      {
+         *          name: 'fib',
+         *          value: [{'js': Number}, {'rust': Number}, ...]
+         *      },
+         *      ...
+         *  ]
+         */
+        app.get('/experiments/averages', (req, res, next) => {
+            Experiments.find({}).toArray((err, results) => {
+                if(err){ return res.json({err}) }
+
+                const f1 = (d, f) => ({
+                    js: mean(d[f].js),
+                    rust: mean(d[f].rust),
+                    go: mean(d[f].go)
+                })
+
+                const f2 = (name, obj) => ({
+                    name,
+                    value: [{'js': [ obj[name].js ]}, {'rust': [ obj[name].rust ]}, {'go': [ obj[name].go ]}]
+                })
+
+                const json = results.map(doc => ({
+                        fib: f1(doc, 'fib'),
+                        eratosthenes: f1(doc, 'eratosthenes'),
+                        merge_sort: f1(doc, 'merge_sort'),
+                        array_reverse: f1(doc, 'array_reverse'),
+                    })) // [Object { js: Number, rust: Number, go: Number }]
+                    .reduce((acc, cur) => acc === null 
+                        ? [
+                            f2('fib', cur),
+                            f2('eratosthenes', cur),
+                            f2('merge_sort', cur),
+                            f2('array_reverse', cur),
+                        ] // [ { name: String, value: [{js: [Number]}, {rust: [Number]}, {go: [Number]}] } ]
+                        : acc.map(x => {
+                            ['fib', 'eratosthenes', 'merge_sort', 'array_reverse'].forEach((name, i) => {
+                                ['js', 'rust', 'go'].forEach(runtime => {
+                                    x[i].value[runtime].push(cur[name][runtime])
+                                })
+                            })
+                        }), null)
+                    .map(x => {
+                        ['js', 'rust', 'go'].forEach((runtime, i) => {
+                            x.value[i][runtime] = mean(x.value[i][runtime])
+                        })
+                        return x;
+                    })
+                
+                console.log('json:', json)
+
+                res.json(json);
+            })
+        })
+
         app.get('/experiments/:fn', (req, res, next) => {
             Experiments.find({}).toArray((err, results) => {
                 if(err){ return res.json({err}) }
@@ -152,7 +212,6 @@ const init = (app) => {
             })
         })
 
-        
     })
 }
 
