@@ -167,11 +167,12 @@ const init = (app) => {
                             f2('array_reverse', cur),
                         ] // [ { name: String, value: [{js: [Number]}, {rust: [Number]}, {go: [Number]}] } ]
                         : acc.map(x => {
-                            ['fib', 'eratosthenes', 'merge_sort', 'array_reverse'].forEach((name, i) => {
-                                ['js', 'rust', 'go'].forEach(runtime => {
-                                    x[i].value[runtime].push(cur[name][runtime])
+                            ['fib', 'eratosthenes', 'merge_sort', 'array_reverse'].forEach((name) => {
+                                ['js', 'rust', 'go'].forEach((runtime, i) => {
+                                    x.value[i][runtime].push(cur[name][runtime])
                                 })
                             })
+                            return x;
                         }), null)
                     .map(x => {
                         ['js', 'rust', 'go'].forEach((runtime, i) => {
