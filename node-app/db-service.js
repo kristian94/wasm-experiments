@@ -142,6 +142,8 @@ const init = (app) => {
             Experiments.find({}).toArray((err, results) => {
                 if(err){ return res.json({err}) }
 
+
+
                 const f1 = (d, f) => ({
                     js: mean(d[f].js),
                     rust: mean(d[f].rust),
@@ -154,10 +156,10 @@ const init = (app) => {
                 })
 
                 const json = results.map(doc => ({
-                        fib: f1(doc, 'fib'),
-                        eratosthenes: f1(doc, 'eratosthenes'),
-                        merge_sort: f1(doc, 'merge_sort'),
-                        array_reverse: f1(doc, 'array_reverse'),
+                        fib:            f1(doc, 'fib'),
+                        eratosthenes:   f1(doc, 'eratosthenes'),
+                        merge_sort:     f1(doc, 'merge_sort'),
+                        array_reverse:  f1(doc, 'array_reverse'),
                     })) // [Object { js: Number, rust: Number, go: Number }]
                     .reduce((acc, cur) => acc === null 
                         ? [
@@ -167,10 +169,8 @@ const init = (app) => {
                             f2('array_reverse', cur),
                         ] // [ { name: String, value: [{js: [Number]}, {rust: [Number]}, {go: [Number]}] } ]
                         : acc.map(x => {
-                            ['fib', 'eratosthenes', 'merge_sort', 'array_reverse'].forEach((name) => {
-                                ['js', 'rust', 'go'].forEach((runtime, i) => {
-                                    x.value[i][runtime].push(cur[name][runtime])
-                                })
+                            ['js', 'rust', 'go'].forEach((runtime, i) => {
+                                x.value[i][runtime].push(cur[x.name][runtime])
                             })
                             return x;
                         }), null)
