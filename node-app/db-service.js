@@ -110,7 +110,11 @@ const init = (app) => {
         }
 
         app.get('/experiments', (req, res, next) => {
-            Experiments.find({}).toArray((err, results) => {
+            const options = Object.assign({
+                skip: 0
+            }, req.query)
+
+            Experiments.find({}).skip(Number(options.skip)).toArray((err, results) => {
                 if(err){ return res.json({err}) }
                 
                 const _results = mapExperimentResults(results, numbers => ({
@@ -139,10 +143,12 @@ const init = (app) => {
          *  ]
          */
         app.get('/experiments/averages', (req, res, next) => {
-            Experiments.find({}).toArray((err, results) => {
+            const options = Object.assign({
+                skip: 0
+            }, req.query)
+
+            Experiments.find({}).skip(Number(options.skip)).toArray((err, results) => {
                 if(err){ return res.json({err}) }
-
-
 
                 const f1 = (d, f) => ({
                     js: mean(d[f].js),
@@ -188,15 +194,15 @@ const init = (app) => {
         })
 
         app.get('/experiments/:fn', (req, res, next) => {
-            Experiments.find({}).toArray((err, results) => {
+            const options = Object.assign({
+                skip: 0
+            }, req.query)
+
+            Experiments.find({}).skip(Number(options.skip)).toArray((err, results) => {
                 if(err){ return res.json({err}) }
                 
                 const { fn } = req.params;
                 const { round } = Math;
-
-
-                console.log(results)
-
 
                 res.json(results.map(r => [
                     r.name,
