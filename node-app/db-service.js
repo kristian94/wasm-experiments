@@ -210,7 +210,7 @@ const init = (app) => {
                     r.browser, 
                     `${round(mean(r[fn].js))} (100%)`, 
                     `${round(mean(r[fn].rust))} (${round(mean(r[fn].rust) / mean(r[fn].js) * 100)}%)`, 
-                    `${round(mean(r[fn].go))} (${round(mean(r[fn].go) / mean(r[fn].js) * 100)})%`,
+                    `${round(mean(r[fn].go))} (${round(mean(r[fn].go) / mean(r[fn].js) * 100)}%)`,
                     'standard deviations:',
                     standardDeviation(r[fn].js).toFixed(2), 
                     standardDeviation(r[fn].rust).toFixed(2), 
