@@ -114,7 +114,7 @@ const init = (app) => {
                 skip: 0
             }, req.query)
 
-            Experiments.find({}).skip(Number(options.skip)).toArray((err, results) => {
+            Experiments.find({ omitted: {$ne: true} }).skip(Number(options.skip)).toArray((err, results) => {
                 if(err){ return res.json({err}) }
                 
                 const _results = mapExperimentResults(results, numbers => ({
@@ -147,7 +147,7 @@ const init = (app) => {
                 skip: 0
             }, req.query)
 
-            Experiments.find({}).skip(Number(options.skip)).toArray((err, results) => {
+            Experiments.find({ omitted: {$ne: true} }).skip(Number(options.skip)).toArray((err, results) => {
                 if(err){ return res.json({err}) }
 
                 const f1 = (d, f) => ({
@@ -198,7 +198,7 @@ const init = (app) => {
                 skip: 0
             }, req.query)
 
-            Experiments.find({}).skip(Number(options.skip)).toArray((err, results) => {
+            Experiments.find({ omitted: {$ne: true} }).skip(Number(options.skip)).toArray((err, results) => {
                 if(err){ return res.json({err}) }
                 
                 const { fn } = req.params;
