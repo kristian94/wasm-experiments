@@ -16,7 +16,17 @@
 
 
     <script>
-      const colors = ["#2D2D53", "#7CA420",  "#C24B2B"];
+      // const colors = ["#2D2D53", "#7CA420",  "#C24B2B"];
+
+      const rgb = (i, base, offset) => `rgb(${[base, base, base].map((x, _i) => i == _i ? x + offset : x).join(', ')})`;
+
+      const rgbs = (base, offset) => [
+        rgb(0, base, offset),
+        rgb(1, base, offset),
+        rgb(2, base, offset)
+      ];
+
+      const colors = rgbs(80, 100);
 
       function Chart(width, height, id) {
 	
@@ -95,7 +105,7 @@
               .attr("class", "x axis")
               .attr("transform", "translate(0," + chart.height + ")")
               .call(chart.xAxis);
-
+-
         //group y axis
         g.append("g")
         .attr("class", "y axis")
