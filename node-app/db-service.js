@@ -183,7 +183,15 @@ const init = (app) => {
                     .map(x => {
                         ['js', 'rust', 'go'].forEach((runtime, i) => {
                             x.value[i][runtime] = mean(x.value[i][runtime])
+
                         })
+                        const jsMean = x.value[0].js;
+                        const rustMean = x.value[1].rust;
+                        const goMean = x.value[2].go;
+
+                        x.rust_rel = `${Math.round(rustMean)} (${Math.round((rustMean / jsMean * 100))}%)`;
+                        x.go_rel = `${Math.round(goMean)} (${Math.round((goMean / jsMean * 100))}%)`;
+
                         return x;
                     })
                 
