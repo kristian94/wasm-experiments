@@ -201,6 +201,77 @@ const init = (app) => {
             })
         })
 
+/* 
+        *
+        *
+        */
+       app.get('/experiments/mean_deviations', (req, res, next) => {
+        const options = Object.assign({
+            skip: 0
+        }, req.query)
+
+        Experiments.find({ omitted: {$ne: true} }).skip(Number(options.skip)).toArray((err, results) => {
+            if(err){ return res.json({err}) }
+            
+            const runtimes = ['js', 'rust', 'go'];
+            const fns = ['fib', 'eratosthenes', 'merge_sort', 'array_reverse'];
+
+            const stdDevs = {};
+
+            runtimes.forEach(runtime => {
+                fns.forEach(fn => {
+                    stdDevs[fn] = (stdDevs[fn] || {});
+                    stdDevs[fn][runtime] = [];
+
+                })
+            })
+
+
+            const _res = results.map(r => {
+                const o = {};
+                runtimes.forEach(runtime => {
+                    fns.forEach(fn => {
+                        if(!o[fn]) o[fn] = {};
+                        
+                        o[fn][runtime] = standardDeviation(r[fn][runtime]);
+                    })
+                })
+                
+                return o;
+            })
+            /**
+             *  [ 
+             *      {
+             *          fib: {
+             *              js: Number,
+             *              rust: Number,
+             *              go: Number,
+             *          },
+             *          ...
+             *      }, 
+             *      ... 
+             *  ]
+             */
+            .reduce((acc, cur) => {
+                fns.forEach(fn => {
+                    runtimes.forEach(runtime => {
+                        console.log(acc)
+                        acc[fn][runtime].push(cur[fn][runtime])
+                    })
+                })
+                return acc;
+            }, stdDevs)
+
+            fns.forEach(fn => {
+                runtimes.forEach(runtime => {
+                    _res[fn][runtime] = Math.round(mean(_res[fn][runtime]));
+                })
+            })
+
+            res.json(_res);
+        })
+    })
+
         app.get('/experiments/:fn', (req, res, next) => {
             const options = Object.assign({
                 skip: 0
@@ -227,6 +298,7 @@ const init = (app) => {
             })
         })
 
+        
     })
 }
 
