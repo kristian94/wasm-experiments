@@ -5,11 +5,9 @@ import (
 	"time"
 )
 
-const num = 45
+// just an experiment -> did not work
 
-func main() {
-	runFib(num)
-}
+const num = 45
 
 func runFib(num int) {
 	jobs := make(chan int, num)
@@ -36,15 +34,15 @@ func runFib(num int) {
 
 func worker(jobs <-chan int, results chan<- int) {
 	for n := range jobs {
-		results <- fib(n)
+		results <- fib2(n)
 	}
 }
 
-func fib(n int) int {
+func fib2(n int) int {
 	if n <= 1 {
 		return n
 	}
-	return fib(n-1) + fib(n-2)
+	return fib2(n-1) + fib2(n-2)
 }
 
 // calculate time elapsed
